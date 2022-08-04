@@ -1,7 +1,4 @@
-import math
-
-
-class ScrapBillAFIP:
+class ScrapFacturaA:
 
     def __init__(self, page_block=None):
         self.page_block = page_block
@@ -79,9 +76,3 @@ class ScrapBillAFIP:
         for key, value in self.scrap().items():
             print(key, value)
 
-    def print_page_block(self):
-        for x in self.page_block:
-            x0, y0, x1, y1, word, block_no, block_type = x
-            words = word.split('\n')
-            text_to_show = f'y0:{math.floor(y0)} y1:{math.floor(y1)} x0:{math.floor(x0)} x1:{math.floor(x1)}, words:{words}'
-            print(text_to_show)
