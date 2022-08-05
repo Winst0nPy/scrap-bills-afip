@@ -24,12 +24,19 @@ class ScrapFacturaA:
             "total": self.get_total()
         }
 
-    def get_articulos(self):
+    def get_articulos(self) -> str:
         coor = COOR_FACTURAS_A['articulos']
-        text_list = fh.get_text_in_coordinates_and_sort_by_x(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
-        print(text_list)
 
-        pass
+        try:
+            y0 = fh.get_coordinate_by_anchors(ARTICULOS_ANCHOR_Y0, self.page_block)[3]
+        except IndexError:
+            return self.default
+
+        articulos = fh.get_text_in_coordinate_and_sort_by_x(coor['x0'], coor['x1'], y0, coor['y1'],
+                                                            self.page_block)
+        for x in articulos:
+            print(x)
+        print('\n')
 
     def get_articulo(self):
         return {
@@ -44,7 +51,7 @@ class ScrapFacturaA:
 
     def get_tipo_factura(self):
         coor = COOR_FACTURAS_A['tipo_factura']
-        text_list = fh.get_text_in_coordinates(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
+        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
         if text_list:
             try:
                 return TIPO_FACTURA[text_list[0]]
@@ -55,22 +62,22 @@ class ScrapFacturaA:
 
     def get_fecha(self):
         coor = COOR_FACTURAS_A['fecha']
-        text_list = fh.get_text_in_coordinates(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
+        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
         return text_list[0] if text_list else self.default
 
     def get_punto_venta(self):
         coor = COOR_FACTURAS_A['punto_venta_nro_factura']
-        text_list = fh.get_text_in_coordinates(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
+        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
         return text_list[2] if text_list else self.default
 
     def get_nro_factura(self):
         coor = COOR_FACTURAS_A['punto_venta_nro_factura']
-        text_list = fh.get_text_in_coordinates(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
+        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
         return text_list[3] if text_list else self.default
 
     def get_cuit_cliente(self):
         coor = COOR_FACTURAS_A['cuit_cliente_razon_social']
-        text_list = fh.get_text_in_coordinates(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
+        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
 
         if text_list:
             try:
@@ -82,25 +89,25 @@ class ScrapFacturaA:
 
     def get_razon_social(self):
         coor = COOR_FACTURAS_A['cuit_cliente_razon_social']
-        text_list = fh.get_text_in_coordinates(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
+        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
         return text_list[-1] if text_list else self.default
 
     def get_moneda(self):
         coor = COOR_FACTURAS_A['moneda']
-        text_list = fh.get_text_in_coordinates(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
+        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
         if text_list:
             return 'USD' if 'USD' in ' '.join(text_list) else 'ARS'
         return self.default
 
     def get_tipo_cambio(self):
         coor = COOR_FACTURAS_A['tipo_cambio_total']
-        text_list = fh.get_text_in_coordinates(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
+        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
         tipo_cambio = re.search(r'\d+\.\d+', text_list[0])
         return float(tipo_cambio.group()) if tipo_cambio else self.default
 
     def get_total(self):
         coor = COOR_FACTURAS_A['tipo_cambio_total']
-        text_list = fh.get_text_in_coordinates(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
+        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
         return text_list[-1] if text_list else self.default
 
     def get_nro_presupuesto(self):

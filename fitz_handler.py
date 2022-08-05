@@ -26,11 +26,11 @@ def get_page_blocks(page):
     return page.get_textpage().extractBLOCKS()
 
 
-def sort_page_block(blocks):
-    blocks.sort(key=lambda x: x[3])
+def sort_page_block_by_y0(blocks):
+    blocks.sort(key=lambda x: x[1])
 
 
-def get_text_in_coordinates(x0, x1, y0, y1, blocks) -> list[str]:
+def get_text_in_coordinate(x0, x1, y0, y1, blocks) -> list[str]:
     aux_lst = []
 
     for block in blocks:
@@ -41,7 +41,7 @@ def get_text_in_coordinates(x0, x1, y0, y1, blocks) -> list[str]:
     return aux_lst if len(aux_lst) >= 1 else None
 
 
-def get_text_in_coordinates_and_sort_by_x(x0, x1, y0, y1, blocks) -> list[str]:
+def get_text_in_coordinate_and_sort_by_x(x0, x1, y0, y1, blocks) -> list[str]:
     aux_lst = []
     
     for block in blocks:
@@ -49,16 +49,21 @@ def get_text_in_coordinates_and_sort_by_x(x0, x1, y0, y1, blocks) -> list[str]:
         if are_between([b_x0, b_x1], x0, x1) and are_between([b_y0, b_y1], y0, y1):
             aux_lst.append(block)
 
-    print(aux_lst)
-    aux_lst.sort(key=lambda x: x[0])
-
+    aux_lst.sort(key=lambda x: x[6])
+#    print(aux_lst)
     return [word[4] for word in aux_lst]
 
             
-def is_between(n, start, end) -> bool:
+def is_between(n: int, start: int, end: int) -> bool:
     return start <= n <= end
 
 
-def are_between(array, start, end) -> bool:
+def are_between(array: list[int], start: int, end: int) -> bool:
     return all([is_between(n, start, end) for n in array])
 
+
+def get_coordinate_by_anchors(anchors: list[str], blocks: list[tuple]) -> tuple[any]:
+    for block in blocks:
+        word = block[4]
+        if all([anchor in word for anchor in anchors]):
+            return block
