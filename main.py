@@ -11,11 +11,13 @@ def main():
     for file in source_files:
         with fitz.open(file) as doc:
             page = doc[0]
-            block = fh.get_page_block(page)
-            block = fh.round_all_coordinates_in_blocks(block)
-            fh.sort_page_block(block)
-            fh.print_page_blocks(block)
-            fh.print_page_blocks_by_keyword(block, 'COD.')
+            blocks = fh.get_page_blocks(page)
+            blocks = fh.round_all_coordinates_in_blocks(blocks)
+            fh.sort_page_block(blocks)
+            # fh.print_page_blocks(blocks)
+            scrap = ScrapFacturaA(blocks)
+            scrap.scrap()
+            scrap.print_scrap()
 
 
 if __name__ == '__main__':

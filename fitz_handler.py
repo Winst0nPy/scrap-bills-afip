@@ -18,11 +18,11 @@ def print_page_blocks(blocks):
 
 
 def round_all_coordinates_in_blocks(blocks):
-    return [(math.floor(x0), math.floor(y0), math.floor(x1), math.floor(y1), word.split('\n'), block_no, block_type)
+    return [(math.floor(x0), math.floor(y0), math.floor(x1), math.floor(y1), [w for w in word.split('\n') if w], block_no, block_type)
             for x0, y0, x1, y1, word, block_no, block_type in blocks]
 
 
-def get_page_block(page):
+def get_page_blocks(page):
     return page.get_textpage().extractBLOCKS()
 
 
@@ -30,15 +30,20 @@ def sort_page_block(blocks):
     blocks.sort(key=lambda x: x[3])
 
 
-def get_text_in_coordinates(coordinates: tuple[int], blocks) -> str:
+def get_text_in_coordinates(x0, x1, y0, y1, blocks) -> list[str]:
     aux_lst = []
+
     for block in blocks:
-        text = block[4]
-        if all([is_between(coordinate) for coordinate in block[:4]]):
-            aux_lst.append(text)
+        b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+        if are_between([b_x0, b_x1], x0, x1) and are_between([b_y0, b_y1], y0, y1):
+            aux_lst += text
 
-    pass
+    return aux_lst if len(aux_lst) > 1 else None
 
 
-def is_between_coordinates(n, coordinates) -> bool:
+def is_between(n, start, end) -> bool:
     return start <= n <= end
+
+
+def are_between(array, start, end) -> bool:
+    return all([is_between(n, start, end) for n in array])
