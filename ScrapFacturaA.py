@@ -26,7 +26,7 @@ class ScrapFacturaA:
 
     def get_articulos(self):
         coor = COOR_FACTURAS_A['articulos']
-        text_list = fh.get_text_in_coordinates(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
+        text_list = fh.get_text_in_coordinates_and_sort_by_x(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
         print(text_list)
 
         pass
@@ -71,9 +71,10 @@ class ScrapFacturaA:
     def get_cuit_cliente(self):
         coor = COOR_FACTURAS_A['cuit_cliente_razon_social']
         text_list = fh.get_text_in_coordinates(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
+
         if text_list:
             try:
-                return text_list[2]
+                return [text for text in text_list if re.match(r'\d{11}', text)][0]
             except IndexError:
                 print("INDEX ERROR IN GET CUIT CLIENTE")
                 print(text_list)
@@ -82,8 +83,7 @@ class ScrapFacturaA:
     def get_razon_social(self):
         coor = COOR_FACTURAS_A['cuit_cliente_razon_social']
         text_list = fh.get_text_in_coordinates(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_block)
-        print(text_list)
-        return text_list[3] if text_list else self.default
+        return text_list[-1] if text_list else self.default
 
     def get_moneda(self):
         coor = COOR_FACTURAS_A['moneda']
@@ -124,9 +124,10 @@ class ScrapFacturaA:
     def get_unidad_medida(self):
         pass
 
+    def get_subtotal_con_iva(self):
+        pass
+
     def print_scrap(self):
         for key, value in self.obj.items():
             print(f'"{key}": {value}')
-
-    def get_subtotal_con_iva(self):
-        pass
+        print('\n')

@@ -38,12 +38,27 @@ def get_text_in_coordinates(x0, x1, y0, y1, blocks) -> list[str]:
         if are_between([b_x0, b_x1], x0, x1) and are_between([b_y0, b_y1], y0, y1):
             aux_lst += text
 
-    return aux_lst if len(aux_lst) > 1 else None
+    return aux_lst if len(aux_lst) >= 1 else None
 
 
+def get_text_in_coordinates_and_sort_by_x(x0, x1, y0, y1, blocks) -> list[str]:
+    aux_lst = []
+    
+    for block in blocks:
+        b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+        if are_between([b_x0, b_x1], x0, x1) and are_between([b_y0, b_y1], y0, y1):
+            aux_lst.append(block)
+
+    print(aux_lst)
+    aux_lst.sort(key=lambda x: x[0])
+
+    return [word[4] for word in aux_lst]
+
+            
 def is_between(n, start, end) -> bool:
     return start <= n <= end
 
 
 def are_between(array, start, end) -> bool:
     return all([is_between(n, start, end) for n in array])
+

@@ -17,7 +17,7 @@ def main():
             # fh.print_page_blocks(blocks)
             scrap = ScrapFacturaA(blocks)
             scrap.scrap()
-            scrap.print_scrap()
+            #scrap.print_scrap()
 
 
 if __name__ == '__main__':
