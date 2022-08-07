@@ -1,5 +1,6 @@
 # (x0, y0, x1, y1, "lines in the block", block_no, block_type)
 import math
+from operator import itemgetter
 
 
 def print_page_blocks_by_keyword(blocks, keyword_to_search: str) -> None:
@@ -26,8 +27,8 @@ def get_page_blocks(page):
     return page.get_textpage().extractBLOCKS()
 
 
-def sort_page_block_by_y0(blocks):
-    blocks.sort(key=lambda x: x[1])
+def sort_blocks_by_y0(blocks):
+    blocks.sort(key=itemgetter(1))
 
 
 def get_text_in_coordinate(x0, x1, y0, y1, blocks) -> list[str]:
@@ -35,23 +36,25 @@ def get_text_in_coordinate(x0, x1, y0, y1, blocks) -> list[str]:
 
     for block in blocks:
         b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+        if b_y1 > y1:
+            break
         if are_between([b_x0, b_x1], x0, x1) and are_between([b_y0, b_y1], y0, y1):
             aux_lst += text
 
     return aux_lst if len(aux_lst) >= 1 else None
 
 
-def get_text_in_coordinate_and_sort_by_x(x0, x1, y0, y1, blocks) -> list[str]:
+def get_blocks_in_coordinate(x0, x1, y0, y1, blocks) -> list[str]:
     aux_lst = []
     
     for block in blocks:
         b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+        if b_y1 > y1:
+            break
         if are_between([b_x0, b_x1], x0, x1) and are_between([b_y0, b_y1], y0, y1):
             aux_lst.append(block)
 
-    aux_lst.sort(key=lambda x: x[6])
-#    print(aux_lst)
-    return [word[4] for word in aux_lst]
+    return aux_lst
 
             
 def is_between(n: int, start: int, end: int) -> bool:
@@ -62,8 +65,19 @@ def are_between(array: list[int], start: int, end: int) -> bool:
     return all([is_between(n, start, end) for n in array])
 
 
-def get_coordinate_by_anchors(anchors: list[str], blocks: list[tuple]) -> tuple[any]:
+def get_coordinate_by_list_anchors(anchors: list[str], blocks: list[tuple]) -> tuple[any]:
     for block in blocks:
         word = block[4]
         if all([anchor in word for anchor in anchors]):
             return block
+
+
+def get_text_from_blocks(blocks) -> list[str]:
+    return [block[4] for block in blocks]
+
+
+def is_keyword_in_blocks(keyword, blocks):
+    for block in blocks:
+        b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+        if keyword in text:
+            return True
