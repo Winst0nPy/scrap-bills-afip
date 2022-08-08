@@ -1,6 +1,7 @@
 import fitz_handler as fh
 import regex as re
 from Product import *
+import patterns as pa
 from config import *
 
 
@@ -33,18 +34,20 @@ class ScrapFacturaA:
             return self.default
 
         blocks_products = fh.get_blocks_in_coordinate(coor['x0'], coor['x1'], products_y0, coor['y1'], self.page_blocks)
+        rows = fh.find_block_by_pattern(pa.is_product_row, blocks_products)
+
+        print(rows)
 
         products = []
         for block in blocks_products:
             b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
-
             product = fh.get_text_in_coordinate(coor['x0'], coor['x1'], b_y0, b_y1, blocks_products)
             if product:
                 product = [' '.join(product[:-7])] + product[len(product)-7:]
                 products.append(product)
 
-        for product in products:
-            print(product)
+        #for product in products:
+          #   print(product)
 
     def get_fecha(self):
         coor = COOR_FACTURAS_A['fecha']
