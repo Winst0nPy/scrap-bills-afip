@@ -3,7 +3,7 @@ import math
 from operator import itemgetter
 
 
-def print_page_blocks_by_keyword(blocks, keyword_to_search: str) -> None:
+def print_page_blocks_by_keyword(keyword_to_search: str, blocks) -> None:
     for x in blocks:
         x0, y0, x1, y1, word, block_no, block_type = x
         if keyword_to_search in word:
@@ -16,6 +16,7 @@ def print_page_blocks(blocks):
         x0, y0, x1, y1, word, block_no, block_type = x
         text_to_show = f'y0:{y0} y1:{y1} x0:{x0} x1:{x1}, block_no: {block_no} word: {word} '
         print(text_to_show)
+    print('\n')
 
 
 def round_all_coordinates_in_blocks(blocks):
@@ -25,6 +26,10 @@ def round_all_coordinates_in_blocks(blocks):
 
 def get_page_blocks(page):
     return page.get_textpage().extractBLOCKS()
+
+
+def get_page_words(page):
+    return page.get_textpage().extractWORDS()
 
 
 def sort_blocks_by(option: str, blocks: tuple[any]):
@@ -100,18 +105,11 @@ def find_block_by_keywords(keywords, blocks) -> tuple[any]:
             return block
 
 
-def find_block_by_pattern(pattern, blocks):
-    for block in blocks:
-        b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
-        if pattern(block):
-            return block
-
-
-def find_anchors_in_block(pattern, blocks):
+def find_blocks_by_pattern(pattern, blocks):
     anchors = []
     for block in blocks:
         b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
         if pattern(block):
-            anchors.append([b_x0, b_y0, b_x1, b_y1])
+            anchors.append(block)
     return anchors if len(anchors) >= 1 else None
 
