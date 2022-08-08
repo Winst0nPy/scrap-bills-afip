@@ -28,21 +28,23 @@ class ScrapFacturaA:
         coor = COOR_FACTURAS_A['articulos']
 
         try:
-            y0 = fh.get_coordinate_by_list_anchors(ARTICULOS_ANCHOR_Y0, self.page_blocks)[3]
+            products_y0 = fh.get_coordinate_by_list_anchors(ARTICULOS_ANCHOR_Y0, self.page_blocks)[3]
         except IndexError:
             return self.default
 
-        blocks_products = fh.get_blocks_in_coordinate(coor['x0'], coor['x1'], y0, coor['y1'], self.page_blocks)
+        blocks_products = fh.get_blocks_in_coordinate(coor['x0'], coor['x1'], products_y0, coor['y1'], self.page_blocks)
 
         products = []
         for block in blocks_products:
             b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+
             product = fh.get_text_in_coordinate(coor['x0'], coor['x1'], b_y0, b_y1, blocks_products)
             if product:
                 product = [' '.join(product[:-7])] + product[len(product)-7:]
                 products.append(product)
 
-        return [Product(product).create_product() for product in products]
+        for product in products:
+            print(product)
 
     def get_fecha(self):
         coor = COOR_FACTURAS_A['fecha']
@@ -86,7 +88,10 @@ class ScrapFacturaA:
     def get_tipo_cambio(self):
         coor = COOR_FACTURAS_A['tipo_cambio_total']
         text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_blocks)
-        tipo_cambio = re.search(r'\d+\.\d+', text_list[0])
+        if text_list:
+            tipo_cambio = re.search(r'\d+\.\d+', text_list[0])
+        else:
+            return self.default
         return float(tipo_cambio.group()) if tipo_cambio else self.default
 
     def get_total(self):

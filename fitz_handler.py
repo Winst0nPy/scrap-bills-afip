@@ -14,7 +14,7 @@ def print_page_blocks_by_keyword(blocks, keyword_to_search: str) -> None:
 def print_page_blocks(blocks):
     for x in blocks:
         x0, y0, x1, y1, word, block_no, block_type = x
-        text_to_show = f'y0:{y0} y1:{y1} x0:{x0} x1:{x1}, word: {word} '
+        text_to_show = f'y0:{y0} y1:{y1} x0:{x0} x1:{x1}, block_no: {block_no} word: {word} '
         print(text_to_show)
 
 
@@ -27,8 +27,17 @@ def get_page_blocks(page):
     return page.get_textpage().extractBLOCKS()
 
 
-def sort_blocks_by_y0(blocks):
-    blocks.sort(key=itemgetter(1))
+def sort_blocks_by(option: str, blocks: tuple[any]):
+    options = {
+        "x0": 0,
+        "y0": 1,
+        "x1": 2,
+        "y1": 3,
+        "word": 4,
+        "block_no": 5
+    }
+
+    blocks.sort(key=itemgetter(options[option]))
 
 
 def get_text_in_coordinate(x0, x1, y0, y1, blocks) -> list[str]:
@@ -81,3 +90,28 @@ def is_keyword_in_blocks(keyword, blocks):
         b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
         if keyword in text:
             return True
+    return False
+
+
+def find_block_by_keywords(keywords, blocks) -> tuple[any]:
+    for block in blocks:
+        b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+        if all([keyword in text for keyword in keywords]):
+            return block
+
+
+def find_block_by_pattern(pattern, blocks):
+    for block in blocks:
+        b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+        if pattern(block):
+            return block
+
+
+def find_anchors_in_block(pattern, blocks):
+    anchors = []
+    for block in blocks:
+        b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+        if pattern(block):
+            anchors.append([b_x0, b_y0, b_x1, b_y1])
+    return anchors if len(anchors) >= 1 else None
+
