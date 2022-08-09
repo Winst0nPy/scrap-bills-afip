@@ -1,4 +1,4 @@
-.idea
-./venv
-venv
-test
+.idea/
+venv/
+test/
+__pycache__/
