@@ -9,7 +9,7 @@ from config import *
 def main():
     source_files = glob.glob(SOURCE_PATH)
     array = []
-    for file in source_files:
+    for file in source_files[:1]:
         with fitz.open(file) as doc:
             page = doc[0]
 
@@ -21,7 +21,7 @@ def main():
 
             scrap = ScrapFacturaA(blocks)
             scrap.scrap()
-            # scrap.print_scrap()
+            scrap.print_scrap()
             # array.append(scrap.obj)
 
     # array_to_excel(array, 'test.xlsx')

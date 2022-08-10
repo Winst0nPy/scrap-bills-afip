@@ -7,8 +7,9 @@ from config import *
 
 class ScrapFacturaA:
 
-    def __init__(self, page_blocks):
+    def __init__(self, page_blocks, page_words):
         self.page_blocks = page_blocks
+        self.page_words = page_words
         self.default = ""
         self.obj = None
 
@@ -36,21 +37,28 @@ class ScrapFacturaA:
         blocks_products = fh.get_blocks_in_coordinate(coor['x0'], coor['x1'], products_y0, coor['y1'], self.page_blocks)
         rows = fh.find_blocks_by_pattern(pa.is_product_row, blocks_products)
 
-        products = []
-        for block in blocks_products:
-            b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
-            product = fh.get_text_in_coordinate(coor['x0'], coor['x1'], b_y0, b_y1, blocks_products)
-            if product:
-                product = [' '.join(product[:-7])] + product[len(product)-7:]
-                products.append(product)
+        if len(rows) == 1:
+            product = fh.get_text_from_blocks(blocks_products)
+            product = [' '.join([x for sublist in product[:-1] for x in sublist])] + product[-1]
+            return [Product(product).create_product()]
 
-        for product in products:
-            print(product)
+        elif len(rows) > 1:
+            products = []
+            for block in blocks_products:
+                b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+                product = fh.get_text_in_coordinate(coor['x0'], coor['x1'], b_y0, b_y1, blocks_products)
+                if product:
+                    product = [' '.join(product[:-7])] + product[len(product)-7:]
+                    products.append(product)
+            return [Product(product).create_product() for product in products]
 
     def get_fecha(self):
-        coor = COOR_FACTURAS_A['fecha']
-        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_blocks)
-        return text_list[0] if text_list else self.default
+        anchor = fh.find_block_by_keyword('Fecha de Emisión', self.page_blocks)
+        if anchor:
+            fecha = fh.find_words_to_the_right_of_block(anchor, self.page_blocks, 3)
+            return fecha[0] if fecha else self.default
+
+        return self.default
 
     def get_punto_venta(self):
         coor = COOR_FACTURAS_A['punto_venta_nro_factura']
@@ -75,9 +83,11 @@ class ScrapFacturaA:
                 return self.default
 
     def get_razon_social(self):
-        coor = COOR_FACTURAS_A['cuit_cliente_razon_social']
-        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_blocks)
-        return text_list[-1] if text_list else self.default
+        anchor = fh.find_block_by_keyword('Apellido y Nombre / Razón Social', self.page_blocks)
+        if anchor:
+            razon_social = fh.find_words_to_the_right_of_block(anchor, self.page_blocks, 2)
+            return razon_social[0] if razon_social else self.default
+        return self.default
 
     def get_moneda(self):
         coor = COOR_FACTURAS_A['moneda']

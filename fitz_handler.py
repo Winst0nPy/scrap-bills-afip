@@ -12,8 +12,8 @@ def print_page_blocks_by_keyword(keyword_to_search: str, blocks) -> None:
 
 
 def print_page_blocks(blocks):
-    for x in blocks:
-        x0, y0, x1, y1, word, block_no, block_type = x
+    for block in blocks:
+        x0, y0, x1, y1, word, block_no, block_type = block
         text_to_show = f'y0:{y0} y1:{y1} x0:{x0} x1:{x1}, block_no: {block_no} word: {word} '
         print(text_to_show)
     print('\n')
@@ -50,8 +50,6 @@ def get_text_in_coordinate(x0, x1, y0, y1, blocks) -> list[str]:
 
     for block in blocks:
         b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
-        if b_y1 > y1:
-            break
         if are_between([b_x0, b_x1], x0, x1) and are_between([b_y0, b_y1], y0, y1):
             aux_lst += text
 
@@ -63,8 +61,6 @@ def get_blocks_in_coordinate(x0, x1, y0, y1, blocks) -> list[str]:
     
     for block in blocks:
         b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
-        if b_y1 > y1:
-            break
         if are_between([b_x0, b_x1], x0, x1) and are_between([b_y0, b_y1], y0, y1):
             aux_lst.append(block)
 
@@ -86,7 +82,7 @@ def get_coordinate_by_list_anchors(anchors: list[str], blocks: list[tuple]) -> t
             return block
 
 
-def get_text_from_blocks(blocks) -> list[str]:
+def get_text_from_blocks(blocks):
     return [block[4] for block in blocks]
 
 
@@ -96,6 +92,22 @@ def is_keyword_in_blocks(keyword, blocks):
         if keyword in text:
             return True
     return False
+
+
+def find_block_by_keyword(keyword, blocks):
+    for block in blocks:
+        b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+        if any([keyword in w for w in text]):
+            return block
+
+
+def find_words_to_the_right_of_block(block, blocks, correction_factor):
+    b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+    return get_text_in_coordinate(b_x1, find_max_x1_in_blocks(blocks), b_y0 - correction_factor, b_y1 + correction_factor, blocks)
+
+
+def find_max_x1_in_blocks(blocks):
+    return max([block[3] for block in blocks])
 
 
 def find_block_by_keywords(keywords, blocks) -> tuple[any]:
