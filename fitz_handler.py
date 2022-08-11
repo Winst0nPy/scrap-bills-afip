@@ -2,6 +2,15 @@
 import math
 from operator import itemgetter
 
+block_values = {
+        "x0": 0,
+        "y0": 1,
+        "x1": 2,
+        "y1": 3,
+        "word": 4,
+        "block_no": 5
+    }
+
 
 def print_page_blocks_by_keyword(keyword_to_search: str, blocks) -> None:
     for x in blocks:
@@ -33,16 +42,7 @@ def get_page_words(page):
 
 
 def sort_blocks_by(option: str, blocks: tuple[any]):
-    options = {
-        "x0": 0,
-        "y0": 1,
-        "x1": 2,
-        "y1": 3,
-        "word": 4,
-        "block_no": 5
-    }
-
-    blocks.sort(key=itemgetter(options[option]))
+    blocks.sort(key=itemgetter(block_values[option]))
 
 
 def get_text_in_coordinate(x0, x1, y0, y1, blocks) -> list[str]:
@@ -124,4 +124,8 @@ def find_blocks_by_pattern(pattern, blocks):
         if pattern(block):
             anchors.append(block)
     return anchors if len(anchors) >= 1 else None
+
+
+def get_all_blocks_by_block_value(attribute: str, value: int, blocks: tuple[any]):
+    return [block for block in blocks if block[block_values[attribute]] == value]
 

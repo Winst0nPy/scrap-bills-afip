@@ -16,7 +16,7 @@ def main():
             blocks = fh.get_page_blocks(page)
             blocks = fh.round_all_coordinates_in_blocks(blocks)
             fh.sort_blocks_by('block_no', blocks)
-            # fh.print_page_blocks(blocks)
+            #fh.print_page_blocks(blocks)
             # fh.print_page_blocks_by_keyword('21%', blocks)
 
             scrap = ScrapFacturaA(blocks)

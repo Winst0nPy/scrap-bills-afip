@@ -7,7 +7,7 @@ from config import *
 
 class ScrapFacturaA:
 
-    def __init__(self, page_blocks, page_words):
+    def __init__(self, page_blocks, page_words=None):
         self.page_blocks = page_blocks
         self.page_words = page_words
         self.default = ""
@@ -85,8 +85,11 @@ class ScrapFacturaA:
     def get_razon_social(self):
         anchor = fh.find_block_by_keyword('Apellido y Nombre / Razón Social', self.page_blocks)
         if anchor:
-            razon_social = fh.find_words_to_the_right_of_block(anchor, self.page_blocks, 2)
-            return razon_social[0] if razon_social else self.default
+            blocks = fh.get_all_blocks_by_block_value('y0', anchor[1], self.page_blocks)
+            for text in fh.get_text_from_blocks(blocks):
+                if pa.is_cuit_in_text(text):
+                    razon_social = text[-1]
+                    return razon_social
         return self.default
 
     def get_moneda(self):
