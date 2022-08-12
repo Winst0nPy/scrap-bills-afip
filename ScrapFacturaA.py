@@ -1,23 +1,26 @@
 import fitz_handler as fh
 import regex as re
-from Product import *
+import traceback
 import patterns as pa
+from Product import *
 from config import *
 
 
 class ScrapFacturaA:
 
-    def __init__(self, page_blocks, page_words=None):
+    def __init__(self, page_blocks):
         self.page_blocks = page_blocks
-        self.page_words = page_words
         self.default = ""
         self.obj = None
 
     def scrap(self):
         self.obj = {
+            "tipo_factura": self.get_tipo_factura(),
             "fecha": self.get_fecha(),
             "punto_venta": self.get_punto_venta(),
             "nro_factura": self.get_nro_factura(),
+            "cuit_emisor": self.get_cuit_emisor(),
+            "razon_social_emisor": self.get_razon_social_emisor(),
             "cuit_cliente": self.get_cuit_cliente(),
             "razon_social": self.get_razon_social(),
             "moneda": self.get_moneda(),
@@ -39,7 +42,11 @@ class ScrapFacturaA:
 
         if len(rows) == 1:
             product = fh.get_text_from_blocks(blocks_products)
-            product = [' '.join([x for sublist in product[:-1] for x in sublist])] + product[-1]
+            if len(product) == 1:
+                product = product[0]
+            else:
+                product = [' '.join([x for sublist in product[:-1] for x in sublist])] + product[-1]
+
             return [Product(product).create_product()]
 
         elif len(rows) > 1:
@@ -111,9 +118,28 @@ class ScrapFacturaA:
     def get_total(self):
         coor = COOR_FACTURAS_A['tipo_cambio_total']
         text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_blocks)
-        return text_list[-1] if text_list else self.default
+        return to_float(text_list[-1]) if text_list else self.default
 
     def print_scrap(self):
         for key, value in self.obj.items():
             print(f'"{key}": {value}')
         print('\n')
+
+    def get_tipo_factura(self):
+        anchor = fh.find_block_by_keyword('COD.', self.page_blocks)
+        if anchor:
+            try:
+                b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = anchor
+                return TIPO_FACTURA[text[0]]
+            except KeyError:
+                traceback.print_exc()
+        return self.default
+
+    def get_razon_social_emisor(self):
+        text = fh.get_text_by_block_no(2, self.page_blocks)
+        return text if text else self.default
+
+    def get_cuit_emisor(self):
+        text = fh.find_text_by_pattern_first_appear(pa.is_cuit_in_text, self.page_blocks)
+        return text if text else self.default
+

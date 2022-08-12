@@ -129,3 +129,16 @@ def find_blocks_by_pattern(pattern, blocks):
 def get_all_blocks_by_block_value(attribute: str, value: int, blocks: tuple[any]):
     return [block for block in blocks if block[block_values[attribute]] == value]
 
+
+def find_text_by_pattern_first_appear(pattern, blocks):
+    for block in blocks:
+        b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+        if pattern(text):
+            return text[0]
+
+
+def get_text_by_block_no(n, blocks):
+    for block in blocks:
+        b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+        if block_no == n:
+            return text[0]

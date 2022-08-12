@@ -1,3 +1,5 @@
+from helpers import *
+
 
 class Product:
 
@@ -12,6 +14,7 @@ class Product:
             "unidad_medida": self.get_unidad_medida(),
             "precio_unitario": self.get_precio_unitario(),
             "%_bonificacion": self.get_bonificacion(),
+            "subtotal": self.get_subtotal(),
             "alicuota_iva": self.get_alicuota_iva(),
             "subtotal_con_iva": self.get_subtotal_con_iva()}
 
@@ -28,17 +31,24 @@ class Product:
         return self.product[2]
 
     def get_precio_unitario(self):
-        return self.product[3]
+        try:
+            return to_float(self.product[3])
+        except ValueError:
+            return 'NAN'
 
     def get_bonificacion(self):
         return self.product[4]
 
     def get_subtotal(self):
-        return self.product[5]
+        try:
+            return to_float(self.product[5])
+        except ValueError:
+            return 'NAN'
 
     def get_alicuota_iva(self):
         return self.product[6]
 
     def get_subtotal_con_iva(self):
-        return self.product[7]
+        return to_float(self.product[7])
+
 
