@@ -14,3 +14,4 @@ def is_cuit_in_text(text):
     if any([words for words in text if pattern.search(words)]):
         return True
 
+
