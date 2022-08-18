@@ -1,4 +1,4 @@
-import fitz_handler as fh
+import handle_fitz as fh
 import regex as re
 import traceback
 import patterns as pa

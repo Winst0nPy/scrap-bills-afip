@@ -1,7 +1,8 @@
 import glob
 import fitz
-import fitz_handler as fh
-from pandas_handler import *
+import handle_fitz as fh
+from handle_pandas import *
+from HandleBillData import HandleBillData
 from ScrapFacturaA import ScrapFacturaA
 from config import *
 
@@ -20,10 +21,10 @@ def main():
             # fh.print_page_blocks(blocks)
             scrap = ScrapFacturaA(blocks)
             scrap.scrap()
-            scrap.print_scrap()
-            array.append(scrap.obj)
+            handle_data = HandleBillData(scrap.obj)
+            handle_data.print_dataframe()
 
-    array_to_excel(array, 'test.xlsx')
+    # array_to_excel(array, 'test.xlsx')
 
 
 if __name__ == '__main__':
