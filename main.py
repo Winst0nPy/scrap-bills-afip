@@ -1,30 +1,41 @@
 import glob
 import fitz
-import handle_fitz as fh
-from handle_pandas import *
-from HandleBillData import HandleBillData
-from ScrapFacturaA import ScrapFacturaA
+import pandas as pd
+from Handlers import handle_fitz as fh
+from ScrapBill import ScrapBill
+from ScrapItems import ScrapItems
 from config import *
 
 
 def main():
     source_files = glob.glob(SOURCE_PATH)
-    array = []
+    bills = []
+    items = []
+
     for index, file in enumerate(source_files):
         print(index, file, '\n')
+
         with fitz.open(file) as doc:
             page = doc[0]
             blocks = fh.get_page_blocks(page)
             blocks = fh.round_all_coordinates_in_blocks(blocks)
             fh.sort_blocks_by('block_no', blocks)
 
-            # fh.print_page_blocks(blocks)
-            scrap = ScrapFacturaA(blocks)
-            scrap.scrap()
-            handle_data = HandleBillData(scrap.obj)
-            handle_data.print_dataframe()
+            sb, si = ScrapBill(blocks), ScrapItems(blocks)
+            bill, bill_items = sb.scrap(), si.scrap()
+            bills.append(bill.to_dict())
+            item_id = bill.cuit_emisor + bill.nro_comprobante
 
-    # array_to_excel(array, 'test.xlsx')
+            for item in bill_items:
+                items.append({**{'id': item_id}, **item.to_dict()})
+
+    bills_df = pd.DataFrame(bills)
+    items_df = pd.DataFrame(items)
+
+    writer = pd.ExcelWriter('comprobantes_afip.xlsx', engine='xlsxwriter')
+    bills_df.to_excel(writer, sheet_name='comprobantes', index=False)
+    items_df.to_excel(writer, sheet_name='items', index=False)
+    writer.save()
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 import regex as re
 
 
-def is_product_row(block):
+def is_item_row(block):
     b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
     if len(text) < 7:
         return False

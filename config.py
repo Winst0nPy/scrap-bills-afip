@@ -1,4 +1,6 @@
-SOURCE_PATH = '.\\test\\*.pdf'
+# SOURCE_PATH = 'sample\\*.pdf'
+SOURCE_PATH = r'C:\Dropbox\TERMO-OBRAS SA\ADMINISTRACION\03. FACTURAS, PAGOS, REMITOS Y RECIBOS\Facturas, notas de credito y debito A\*.pdf'
+
 
 COOR_FACTURAS_A = {
     "tipo_factura": {"x0": 281, "x1": 315, "y0": 70, "y1": 83},
