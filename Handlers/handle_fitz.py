@@ -1,5 +1,6 @@
 # (x0, y0, x1, y1, "lines in the block", block_no, block_type)
 import math
+import regex as re
 from operator import itemgetter
 
 block_values = {
@@ -39,6 +40,14 @@ def get_page_blocks(page):
 
 def get_page_words(page):
     return page.get_textpage().extractWORDS()
+
+
+def get_page_in_json(page):
+    return page.get_textpage().extractJSON()
+
+
+def get_page_in_dict(page):
+    return page.get_textpage().extractDICT()
 
 
 def sort_blocks_by(option: str, blocks: tuple[any]):
@@ -113,7 +122,7 @@ def find_max_x1_in_blocks(blocks):
 def find_block_by_keywords(keywords, blocks) -> tuple[any]:
     for block in blocks:
         b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
-        if all([keyword in text for keyword in keywords]):
+        if all([bool(re.search(keyword, ' '.join(text))) for keyword in keywords]):
             return block
 
 
@@ -142,3 +151,12 @@ def get_text_by_block_no(n, blocks):
         b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
         if block_no == n:
             return text[0]
+
+
+def group_by_y0(blocks) -> dict:
+    group = {}
+    for block in blocks:
+        b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
+        group[b_y0] = text
+    return group
+
