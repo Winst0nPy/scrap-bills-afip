@@ -1,5 +1,4 @@
 from dataclasses import dataclass, asdict
-from Entity.Item import Item
 
 
 @dataclass
