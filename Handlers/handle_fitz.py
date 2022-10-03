@@ -12,6 +12,15 @@ block_values = {
         "block_no": 5
     }
 
+words_values = {
+        "x0": 0,
+        "y0": 1,
+        "x1": 2,
+        "y1": 3,
+        "word": 4,
+        "block_no": 5
+}
+
 
 def print_page_blocks_by_keyword(keyword_to_search: str, blocks) -> None:
     for x in blocks:
@@ -30,8 +39,14 @@ def print_page_blocks(blocks):
 
 
 def round_all_coordinates_in_blocks(blocks):
-    return [(math.floor(x0), math.floor(y0), math.floor(x1), math.floor(y1), [w for w in word.split('\n') if w], block_no, block_type)
+    return [(math.floor(x0), math.floor(y0), math.floor(x1), math.floor(y1), ' '.join([w for w in word.split('\n') if w]), block_no, block_type)
             for x0, y0, x1, y1, word, block_no, block_type in blocks]
+
+
+def round_all_coordinates_in_words(words):
+    # (x0, y0, x1, y1, "word", block_no, line_no, word_no)
+    return [(math.floor(x0), math.floor(y0), math.floor(x1), math.floor(y1), ' '.join([w for w in word.split('\n') if w]), block_no, line_no, word_no)
+            for x0, y0, x1, y1, word, block_no, line_no, word_no in words]
 
 
 def get_page_blocks(page):
@@ -52,6 +67,10 @@ def get_page_in_dict(page):
 
 def sort_blocks_by(option: str, blocks: tuple[any]):
     blocks.sort(key=itemgetter(block_values[option]))
+
+
+def sort_words_by(option: str, words: tuple[any]):
+    words.sort(key=itemgetter(block_values[option]))
 
 
 def get_text_in_coordinate(x0, x1, y0, y1, blocks) -> list[str]:
@@ -153,10 +172,35 @@ def get_text_by_block_no(n, blocks):
             return text[0]
 
 
-def group_by_y0(blocks) -> dict:
+def group_blocks_by_y0(blocks) -> dict:
     group = {}
     for block in blocks:
         b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
-        group[b_y0] = text
+        line = group.get(b_y0, [])
+        line.append(text)
+        group[b_y0] = line
     return group
 
+
+def group_words_by_y0_and_x0(words) -> dict:
+    group = {}
+    for word in words:
+        x0, y0, x1, y1, text, block_no, line_no, word_no = word
+        line = group.get(y0, [])
+        line.append((x0, text))
+        group[y0] = line
+
+    for key, value in group.items():
+        value.sort(key=itemgetter(0))
+        group[key] = [word[1] for word in value]
+
+    keys_to_delete = []
+    for key, value in group.items():
+        if key+1 in group:
+            group[key] = group[key+1] + value
+            keys_to_delete.append(key+1)
+
+    for keys in keys_to_delete:
+        del group[keys]
+
+    return group
