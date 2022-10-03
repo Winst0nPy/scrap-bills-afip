@@ -22,6 +22,9 @@ class ScrapItems:
         block_of_items = fh.get_blocks_in_coordinate(coor['x0'], coor['x1'], items_y0, coor['y1'], self.page_blocks)
         rows = fh.find_blocks_by_pattern(pa.is_item_row, block_of_items)
 
+        if not rows:
+            return [Item()]
+
         if len(rows) == 1:
             item = fh.get_text_from_blocks(block_of_items)
             if len(item) == 1:

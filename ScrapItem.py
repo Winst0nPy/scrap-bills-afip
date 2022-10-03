@@ -30,28 +30,44 @@ class ScrapItem:
     def get_cantidad(self):
         return self.text[1]
 
-    def get_unidad_medida(self):
-        return self.text[2]
+    def get_unidad_medida(self) -> str:
+        try:
+            return self.text[2]
+        except IndexError:
+            return ""
 
-    def get_precio_unitario(self):
+    def get_precio_unitario(self) -> float:
         try:
             return to_float(self.text[3])
         except ValueError:
-            return 'NAN'
+            return 0.0
+        except IndexError:
+            return 0.0
 
-    def get_bonificacion(self):
-        return self.text[4]
+    def get_bonificacion(self) -> str:
+        try:
+            return self.text[4]
+        except IndexError:
+            return ""
 
-    def get_subtotal(self):
+    def get_subtotal(self) -> float:
         try:
             return to_float(self.text[5])
         except ValueError:
-            return 'NAN'
+            return 0.0
+        except IndexError:
+            return 0.0
 
-    def get_alicuota_iva(self):
-        return self.text[6]
+    def get_alicuota_iva(self) -> str:
+        try:
+            return self.text[6]
+        except IndexError:
+            return ""
 
     def get_subtotal_con_iva(self):
-        return to_float(self.text[7])
+        try:
+            return to_float(self.text[7])
+        except IndexError:
+            return 0.0
 
 

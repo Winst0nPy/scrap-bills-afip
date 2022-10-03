@@ -24,7 +24,10 @@ def main():
             sb, si = ScrapBill(blocks), ScrapItems(blocks)
             bill, bill_items = sb.scrap(), si.scrap()
             bills.append(bill.to_dict())
-            item_id = bill.cuit_emisor + bill.nro_comprobante
+            try:
+                item_id = bill.cuit_emisor + bill.nro_comprobante
+            except TypeError:
+                item_id = ""
 
             for item in bill_items:
                 items.append({**{'id': item_id}, **item.to_dict()})
