@@ -65,23 +65,20 @@ def get_page_in_dict(page):
     return page.get_textpage().extractDICT()
 
 
-def sort_blocks_by(option: str, blocks: tuple[any]):
+def sort_blocks_by(option: str, blocks: list[tuple]):
     blocks.sort(key=itemgetter(block_values[option]))
 
 
-def sort_words_by(option: str, words: tuple[any]):
+def sort_words_by(option: str, words: list[tuple]):
     words.sort(key=itemgetter(block_values[option]))
 
 
-def get_text_in_coordinate(x0, x1, y0, y1, blocks) -> list[str]:
-    aux_lst = []
-
+def get_text_in_coordinate(x0, x1, y0, y1, blocks) -> str:
     for block in blocks:
         b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
         if are_between([b_x0, b_x1], x0, x1) and are_between([b_y0, b_y1], y0, y1):
-            aux_lst += text
-
-    return aux_lst if len(aux_lst) >= 1 else None
+            return text
+    return ""
 
 
 def get_blocks_in_coordinate(x0, x1, y0, y1, blocks) -> list[str]:
@@ -125,7 +122,7 @@ def is_keyword_in_blocks(keyword, blocks):
 def find_block_by_keyword(keyword, blocks):
     for block in blocks:
         b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
-        if any([keyword in w for w in text]):
+        if keyword in text:
             return block
 
 
@@ -169,7 +166,7 @@ def get_text_by_block_no(n, blocks):
     for block in blocks:
         b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
         if block_no == n:
-            return text[0]
+            return text
 
 
 def group_blocks_by_y0(blocks) -> dict:
@@ -180,7 +177,6 @@ def group_blocks_by_y0(blocks) -> dict:
         line.append(text)
         group[b_y0] = line
     return group
-
 
 def group_words_by_y0_and_x0(words) -> dict:
     group = {}
@@ -194,13 +190,55 @@ def group_words_by_y0_and_x0(words) -> dict:
         value.sort(key=itemgetter(0))
         group[key] = [word[1] for word in value]
 
+    return group
+
+
+def group_words_by_y0_and_x0_with_error_margin(words, margin: int) -> dict:
+    group = {}
+    for word in words:
+        x0, y0, x1, y1, text, block_no, line_no, word_no = word
+        line = group.get(y0, [])
+        line.append((x0, text))
+        group[y0] = line
+
+    for key, value in group.items():
+        value.sort(key=itemgetter(0))
+        group[key] = [word[1] for word in value]
+
     keys_to_delete = []
     for key, value in group.items():
-        if key+1 in group:
-            group[key] = group[key+1] + value
-            keys_to_delete.append(key+1)
+        if key + margin in group:
+            group[key] = group[key + margin] + value
+            keys_to_delete.append(key + margin)
 
     for keys in keys_to_delete:
         del group[keys]
 
     return group
+
+
+def get_blocks_and_round_sorted(page, sort) -> list[tuple]:
+    blocks = round_all_coordinates_in_blocks(get_page_blocks(page))
+    sort_blocks_by(sort, blocks)
+    return blocks
+
+
+def get_words_and_round_sorted(page, sort) -> list[tuple]:
+    words = round_all_coordinates_in_words(get_page_words(page))
+    sort_words_by(sort, words)
+    return words
+
+
+def group_words_by_y0_and_sort_x0(words):
+    group = {}
+    for word in words:
+        x0, y0, x1, y1, text, block_no, line_no, word_no = word
+        line = group.get(y0, [])
+        line.append((x0, text))
+        group[y0] = line
+
+    for key, value in group.items():
+        value.sort(key=itemgetter(0))
+
+    return group
+

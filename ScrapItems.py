@@ -7,41 +7,19 @@ from Entity.Item import Item
 
 class ScrapItems:
 
-    def __init__(self, page_blocks):
-        self.page_blocks = page_blocks
+    def __init__(self, blocks, words):
+        self.blocks = blocks
+        self.words = words
+        self.sorted_words_by_y0_and_x0 = fh.group_words_by_y0_and_sort_x0(words)
         self.default_result = [Item()]
 
-    def scrap(self) -> str | list[Item]:
-        coor = COOR_FACTURAS_A['articulos']
+    def scrap(self) -> list[Item]:
+        pass
 
-        try:
-            items_y0 = fh.get_coordinate_by_list_anchors(ARTICULOS_ANCHOR_Y0, self.page_blocks)[3]
-        except IndexError:
-            return self.default_result
+    def find_position_of_all_rows_in_words(self):
+        pass
 
-        block_of_items = fh.get_blocks_in_coordinate(coor['x0'], coor['x1'], items_y0, coor['y1'], self.page_blocks)
-        rows = fh.find_blocks_by_pattern(pa.is_item_row, block_of_items)
+    def find_row(self):
+        pass
 
-        if not rows:
-            return [Item()]
-
-        if len(rows) == 1:
-            item = fh.get_text_from_blocks(block_of_items)
-            if len(item) == 1:
-                item = item[0]
-            else:
-                item = [' '.join([x for sublist in item[:-1] for x in sublist])] + item[-1]
-
-            return [ScrapItem(item).scrap()]
-
-        elif len(rows) > 1:
-            items = []
-            for block in block_of_items:
-                b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = block
-                item = fh.get_text_in_coordinate(coor['x0'], coor['x1'], b_y0, b_y1, block_of_items)
-                if item:
-                    item = [' '.join(item[:-7])] + item[len(item)-7:]
-                    items.append(item)
-
-            return [ScrapItem(item).scrap() for item in items]
-
+    

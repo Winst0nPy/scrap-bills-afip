@@ -9,8 +9,10 @@ from Entity.Bill import *
 
 class ScrapBill:
 
-    def __init__(self, page_blocks):
-        self.page_blocks = page_blocks
+    def __init__(self, words, blocks):
+        self.words = words
+        self.blocks = blocks
+        self.sorted_words_by_y0_and_x0 = fh.group_words_by_y0_and_x0(words)
         self.default_result = ""
 
     def scrap(self):
@@ -22,95 +24,88 @@ class ScrapBill:
             self.get_cuit_emisor(),
             self.get_razon_social_emisor(),
             self.get_cuit_cliente(),
-            self.get_razon_social(),
+            self.get_razon_social_receptor(),
             self.get_moneda(),
             self.get_tipo_cambio(),
             self.get_total()
         )
 
     def get_fecha(self) -> str:
-        anchor = fh.find_block_by_keyword('Fecha de Emisión', self.page_blocks)
+        anchor = fh.find_block_by_keyword('Fecha de Emisión', self.blocks)
+
         if anchor:
-            fecha = fh.find_words_to_the_right_of_block(anchor, self.page_blocks, 3)
-            return fecha[0] if fecha else self.default_result
+            fecha = fh.find_words_to_the_right_of_block(anchor, self.blocks, 3)
+            return ''.join(fecha) if fecha else self.default_result
 
         return self.default_result
 
     def get_punto_venta(self) -> int:
         coor = COOR_FACTURAS_A['punto_venta_nro_factura']
-        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_blocks)
+        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.blocks)
         try:
-            return text_list[2] if text_list else 0
+            return text_list.split()[-2] if text_list else 0
         except IndexError:
             return 0
 
     def get_nro_comprobante(self) -> int:
         coor = COOR_FACTURAS_A['punto_venta_nro_factura']
-        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_blocks)
-        return text_list[3] if text_list else 0
+        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.blocks)
+        return text_list.split()[-1] if text_list else 0
 
     def get_cuit_cliente(self) -> str:
-        coor = COOR_FACTURAS_A['cuit_cliente_razon_social']
-
-        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_blocks)
-
-        if text_list:
-            try:
-                return [text for text in text_list if re.match(r'\d{11}', text)][0]
-            except IndexError:
-                print("INDEX ERROR get_cuit_cliente")
-                print(text_list)
-                return self.default_result
-
-    def get_razon_social(self):
-        anchor = fh.find_block_by_keyword('Apellido y Nombre / Razón Social', self.page_blocks)
-        if anchor:
-            blocks = fh.get_all_blocks_by_block_value('y0', anchor[1], self.page_blocks)
-            for text in fh.get_text_from_blocks(blocks):
-                if pa.is_cuit_in_text(text):
-                    razon_social = text[-1]
-                    return razon_social
+        re_cuit = re.compile(r'\d{11}')
+        for y0, text_list in self.sorted_words_by_y0_and_x0.items():
+            if y0 > 140:
+                if any((match := re_cuit.match(text)) for text in text_list):
+                    return match.group(0)
         return self.default_result
 
+    def get_razon_social_receptor(self):
+        text = []
+        anchor = 'Apellido y Nombre / Razón Social:'
+        for key, item in self.sorted_words_by_y0_and_x0.items():
+            if 170 < key < 200:
+               text.append(' '.join(item))
+        txt = ' '.join(text).split(anchor)[-1]
+        return txt.split('Condición')[0].strip() if 'Condición' in txt else txt.strip()
+
     def get_moneda(self):
-        coor = COOR_FACTURAS_A['moneda']
-        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_blocks)
-        if text_list:
-            return 'USD' if 'USD' in ' '.join(text_list) else 'ARS'
-        return 'ARS'
+        for key, item in self.sorted_words_by_y0_and_x0.items():
+            if 200 < key < 280:
+                if '(USD)' in item:
+                    return 'USD'
+            elif key > 280:
+                return 'ARS'
 
     def get_tipo_cambio(self) -> float:
-        coor = COOR_FACTURAS_A['tipo_cambio_total']
-        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_blocks)
-        if text_list:
-            tipo_cambio = re.search(r'\d+\.\d+', text_list[0])
-        else:
-            return 0.0
-        return float(tipo_cambio.group()) if tipo_cambio else 1.0
+        for key, item in self.sorted_words_by_y0_and_x0.items():
+            if 600 < key < 680:
+                if 'consignado' in item:
+                    return float(item[-2])
+        return 1.0
 
     def get_total(self) -> float:
-        coor = COOR_FACTURAS_A['tipo_cambio_total']
-        text_list = fh.get_text_in_coordinate(coor['x0'], coor['x1'], coor['y0'], coor['y1'], self.page_blocks)
-        try:
-            return to_float(text_list[-1]) if text_list else self.default_result
-        except ValueError:
-            return 0.0
+        for key, item in self.sorted_words_by_y0_and_x0.items():
+            if 'Importe' in item and 'Total:' in item:
+                return float(item[-1].replace(',', '.'))
+        return 0.0
 
     def get_tipo_factura(self) -> str:
-        anchor = fh.find_block_by_keyword('COD.', self.page_blocks)
+        anchor = fh.find_block_by_keyword('COD.', self.blocks)
         if anchor:
             try:
                 b_x0, b_y0, b_x1, b_y1, text, block_no, block_type = anchor
-                return TIPO_FACTURA[text[0]]
+                return TIPO_FACTURA[text]
             except KeyError:
                 traceback.print_exc()
         return self.default_result
 
-    def get_razon_social_emisor(self):
-        text = fh.get_text_by_block_no(2, self.page_blocks)
+    def get_razon_social_emisor(self) -> str:
+        text = fh.get_text_by_block_no(2, self.blocks)
         return text if text else self.default_result
 
-    def get_cuit_emisor(self):
-        text = fh.find_text_by_pattern_first_appear(pa.is_cuit_in_text, self.page_blocks)
-        return text if text else self.default_result
-
+    def get_cuit_emisor(self) -> str:
+        for key, item in self.sorted_words_by_y0_and_x0.items():
+            if 'CUIT:' in item:
+                return item[-1]
+        return ""

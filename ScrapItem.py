@@ -1,4 +1,4 @@
-from Handlers.handle_data import *
+from Handlers.handle_string import *
 from Entity.Item import Item
 
 
