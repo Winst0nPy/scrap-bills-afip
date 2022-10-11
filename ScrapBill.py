@@ -27,7 +27,9 @@ class ScrapBill:
             self.get_razon_social_receptor(),
             self.get_moneda(),
             self.get_tipo_cambio(),
-            self.get_total()
+            self.get_total_neto(),
+            self.get_total(),
+            self.get_nro_presupuesto()
         )
 
     def get_fecha(self) -> str:
@@ -109,3 +111,14 @@ class ScrapBill:
             if 'CUIT:' in item:
                 return item[-1]
         return ""
+
+    def get_nro_presupuesto(self) -> str:
+        for key, item in self.sorted_words_by_y0_and_x0.items():
+            if 'Presupuesto' in item:
+                return item[-1]
+        return ""
+
+    def get_total_neto(self) -> float:
+        for key, item in self.sorted_words_by_y0_and_x0.items():
+            if 'Importe' in item and 'Gravado:' in item:
+                return item[-1]

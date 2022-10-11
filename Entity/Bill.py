@@ -13,7 +13,9 @@ class Bill:
     razon_social_receptor:  str = ""
     moneda: str = ""
     tipo_cambio: float = 0
+    total_neto: float = 0
     total: float = 0
+    nro_presupuesto: str = ""
 
     def to_dict(self) -> dict:
         return {k: v for k, v in asdict(self).items()}

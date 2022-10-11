@@ -1,5 +1,4 @@
 import Handlers.handle_fitz as fh
-import patterns as pa
 from config import *
 from ScrapItem import ScrapItem
 from Entity.Item import Item
